@@ -1,16 +1,44 @@
 import scrapy
+from urllib.parse import urlparse
 import re
+import logging
+
 
 class HelloWorldSpider(scrapy.Spider):
+    print("hello world____________________________________________________________________________________________________________________")
     name = "extract"
     city_names = ["Kegalle", "Deraniyagala", "warakapola", "yatiyanthota", "bulathkopitiya"]
 
+    """def __init__(self, city_name, *args, **kwargs):
+        super(HelloWorldSpider, self).__init__(*args, **kwargs)
+        self.start_url = start_url
+"""
+
+    def __init__(self, start_url=None, *args, **kwargs):
+        super(HelloWorldSpider, self).__init__(*args, **kwargs)
+        self.start_url = start_url
+
     def start_requests(self):
-        # Start from the main page
-        start_url = 'https://doa.gov.lk/'
+        if self.start_url:
+
+            yield scrapy.Request(url=self.start_url, callback=self.parse)
+        else:
+            for city in self.city_names:
+
+                yield scrapy.Request(url=f"http://{city}.cn/", callback=self.parse)
+
+        #[
+            #'https://doa.gov.lk/',
+            #'https://en.wikipedia.org/wiki/List_of_towns_in_Sri_Lanka',
+            #'https://en.wikipedia.org/wiki/Districts_of_Sri_Lanka',
+            #'https://en.wikipedia.org/wiki/List_of_Sri_Lanka',
+            #'https://en.wikipedia.org/wiki/List_of_villages_in_Sri_Lanka'
+        #]
 
         # Initiate crawl
-        yield scrapy.Request(url=start_url, callback=self.parse)
+        #for url in start_url:
+         #   yield scrapy.Request(url=url, callback=self.parse)
+        #yield scrapy.Request(url=start_url, callback=self.parse)
 
     def parse(self, response):
         # Extract the title of the current page
@@ -59,11 +87,17 @@ class HelloWorldSpider(scrapy.Spider):
 
         # Extract all links from the current page
         links = response.css('a::attr(href)').extract()
+        #print(f"Scraping URL: {response.url} ______________________________________________________________________________________________________________________")  # This will print the URL being processed
 
+        dom = response.url
+        #print(dom, "**********************************************************************************")
+        domains = urlparse(response.url).netloc
+        print(domains, "(((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((")
         # Follow links to other pages
         for link in links:
+
             absolute_url = response.urljoin(link)
 
             # Follow the link if it's within the same domain
-            if 'doa.gov.lk' in absolute_url:
+            if any(domain in absolute_url for domain in [domains]):
                 yield scrapy.Request(url=absolute_url, callback=self.parse)
