@@ -2,8 +2,6 @@ import scrapy
 from urllib.parse import urlparse
 import re
 import logging
-from concurrent.futures import ThreadPoolExecutor
-
 
 
 class HelloWorldSpider(scrapy.Spider):
@@ -23,13 +21,11 @@ class HelloWorldSpider(scrapy.Spider):
     def start_requests(self):
         if self.start_url:
 
-            #print(start_url, "____________DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD____________________")
-
             yield scrapy.Request(url=self.start_url, callback=self.parse)
         else:
             for city in self.city_names:
 
-                yield scrapy.Request(url=f"http://.cn/", callback=self.parse)
+                yield scrapy.Request(url=f"http://{city}.cn/", callback=self.parse)
 
         #[
             #'https://doa.gov.lk/',
@@ -85,7 +81,7 @@ class HelloWorldSpider(scrapy.Spider):
         yield {
             'title': title,
             'url': response.url,
-            #'relevant_lines': relevant_lines,
+            'relevant_lines': relevant_lines,
             'data': data,
         }
 
